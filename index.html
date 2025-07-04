@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Undersøkelse om atopisk dermatitt</title>
+    <title>Undersøkelse om atopisk eksem</title>
     <style>
         * {
             margin: 0;
@@ -77,7 +77,15 @@
             background: #2196F3;
             color: white;
         }
-        
+
+		.section-tab.disabled {
+			background: #e1e5e9 !important;
+			color: #bbb !important;
+			pointer-events: none;
+			cursor: not-allowed;
+			opacity: 0.5;
+		}
+		
         .survey-form {
             padding: 40px;
             max-height: 70vh;
@@ -209,7 +217,19 @@
             font-size: 16px;
             color: #333;
         }
-        
+
+		.radio-option input[type="radio"],
+		.checkbox-option input[type="checkbox"] {
+			/* Hide the actual control */
+			opacity: 0;
+			width: 0;
+			height: 0;
+			margin: 0;
+			position: absolute;
+			left: -9999px;
+			pointer-events: none;
+		}
+
         .select-wrapper {
             position: relative;
         }
@@ -450,7 +470,7 @@
 <body>
     <div class="survey-container">
         <div class="survey-header">
-            <h1>Undersøkelse om atopisk dermatitt</h1>
+            <h1>Undersøkelse om atopisk eksem</h1>
             <p>Vennligst svar ærlig på alle spørsmål. Dine svar er konfidensielle.</p>
         </div>
         
@@ -460,13 +480,14 @@
                 <div class="section-tab" data-section="employment">Arbeidssituasjon</div>
                 <div class="section-tab" data-section="treatment">Behandling</div>
                 <div class="section-tab" data-section="past-treatment">Tidligere behandling</div>
-                <div class="section-tab" data-section="comorbidities">Komorbiditeter</div>
+                <div class="section-tab" data-section="comorbidities">Følgesykdommer</div>
                 <div class="section-tab" data-section="disease-severity">Sykdomsgrad</div>
                 <div class="section-tab" data-section="dlqi">DLQI</div>
                 <div class="section-tab" data-section="who5">WHO-5</div>
                 <div class="section-tab" data-section="poem">POEM</div>
                 <div class="section-tab" data-section="hads">HADS</div>
-                <div class="section-tab" data-section="wpai">WPAI</div>
+                <div class="section-tab" data-section="wpai" id="wpaiTab">WPAI</div>
+
             </div>
         </div>
         
@@ -477,7 +498,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du noen gang blitt diagnostisert med atopisk dermatitt av en lege? <span class="required">*</span>
+                        Har du noen gang blitt diagnostisert med atopisk eksem av en lege? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -493,7 +514,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Når opplevde du først symptomer på atopisk dermatitt? <span class="required">*</span>
+                        Når opplevde du først symptomer på atopisk eksem? <span class="required">*</span>
                     </label>
                     <div class="select-wrapper">
                         <select name="ad_onset" class="form-select" required>
@@ -515,7 +536,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Alder <span class="required">*</span>
+                        Alder (Hvor gammel er du nå?) <span class="required">*</span>
                     </label>
                     <div class="age-input-group">
                         <input type="range" name="age_slider" class="age-slider" min="18" max="120" value="30" id="ageSlider">
@@ -526,21 +547,24 @@
                     </div>
                 </div>
                 
-                <div class="question-group">
-                    <label class="question-label">
-                        Bosted (kommune) <span class="required">*</span>
-                    </label>
-                    <div class="select-wrapper">
-                        <select name="location" class="form-select" required>
-                            <option value="">Velg kommune</option>
-                            <option value="oslo">Oslo</option>
-                            <option value="bergen">Bergen</option>
-                            <option value="trondheim">Trondheim</option>
-                            <option value="stavanger">Stavanger</option>
-                            <option value="other">Annen</option>
-                        </select>
-                    </div>
-                </div>
+				<div class="question-group">
+					<label class="question-label">
+						Postnummer <span class="required">*</span>
+					</label>
+					<input 
+						type="number" 
+						name="postal_code" 
+						id="postalCodeInput"
+						class="form-input" 
+						min="1" 
+						max="9999" 
+						required 
+						placeholder="Skriv inn ditt postnummer">
+					<div id="postalCodeError" class="error-message" style="display:none;">
+						Postnummer må være mellom 0001 og 9999.
+					</div>
+				</div>
+
                 
                 <div class="question-group">
                     <label class="question-label">
@@ -554,10 +578,6 @@
                         <div class="radio-option">
                             <input type="radio" name="gender" value="female" id="gender_female" required>
                             <label for="gender_female">Kvinne</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" name="gender" value="non_binary" id="gender_nb" required>
-                            <label for="gender_nb">Ikke-binær</label>
                         </div>
                     </div>
                 </div>
@@ -585,7 +605,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Røyking <span class="required">*</span>
+                        Røyker du? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -601,7 +621,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Vekt (kg) <span class="required">*</span>
+                        Vekt i kg (dra den grønne knappen eller skriv inn et nummer i feltet)<span class="required">*</span>
                     </label>
                     <div class="slider-input-group">
                         <input type="range" name="weight_slider" class="slider-input" min="30" max="200" value="70" id="weightSlider">
@@ -611,7 +631,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Høyde (cm) <span class="required">*</span>
+                        Høyde i cm (dra den grønne knappen eller skriv inn et nummer i feltet) <span class="required">*</span>
                     </label>
                     <div class="slider-input-group">
                         <input type="range" name="height_slider" class="slider-input" min="100" max="220" value="170" id="heightSlider">
@@ -662,26 +682,19 @@
                     </div>
                 </div>
                 
-                <div class="question-group hidden" id="disabilityPercentageQuestion">
-                    <label class="question-label">
-                        Hvis du er delvis uføretrygdet, hvilken uføregrad er innvilget? <span class="required">*</span>
-                    </label>
-                    <div class="select-wrapper">
-                        <select name="disability_percentage" class="form-select"> 
-                            <option value="">Velg prosent</option>
-                            <option value="50">50%</option>
-                            <option value="55">55%</option>
-                            <option value="60">60%</option>
-                            <option value="65">65%</option>
-                            <option value="70">70%</option>
-                            <option value="75">75%</option>
-                            <option value="80">80%</option>
-                            <option value="85">85%</option>
-                            <option value="90">90%</option>
-                            <option value="95">95%</option>
-                        </select>
-                    </div>
-                </div>
+				<div class="question-group hidden" id="disabilityPercentageQuestion">
+					<label class="question-label">
+						Hvis du er delvis uføretrygdet, hvilken uføregrad er innvilget? <span class="required">*</span>
+					</label>
+					<div class="slider-input-group">
+						<input type="range" name="disability_percentage_slider" class="slider-input" min="50" max="99" value="50" id="disabilityPercentageSlider" required>
+						<input type="number" name="disability_percentage" class="form-input slider-number" min="50" max="99" value="50" id="disabilityPercentageNumber" required>
+					</div>
+					<div id="disabilityPercentageError" class="error-message" style="display: none;">
+						Uføregrad må være mellom 50 og 99%.
+					</div>
+				</div>
+
                 
                 <div class="question-group hidden" id="disabilityReasonQuestion">
                     <label class="question-label">
@@ -710,7 +723,7 @@
                         </div>
                         <div class="radio-option">
                             <input type="radio" name="not_working_reason" value="student" id="not_work_student">
-                            <label for="not_work_student">Student / elev</label>
+                            <label for="not_work_student">Student / skoleelev</label>
                         </div>
                         <div class="radio-option">
                             <input type="radio" name="not_working_reason" value="military" id="not_work_military">
@@ -779,16 +792,20 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du noen gang mottatt behandling for AD? <span class="required">*</span>
+                        Har du noen gang mottatt behandling for atopisk eksem? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
                             <input type="radio" name="ever_treated" value="yes" id="treated_yes" required>
-                            <label for="treated_yes">Ja</label>
+                            <label for="treated_yes">Ja, fra hudlege.</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="ever_treated" value="yes" id="treated_yes" required>
+                            <label for="treated_yes">Ja, fra annen type lege (for eks. fastlege).</label>
                         </div>
                         <div class="radio-option">
                             <input type="radio" name="ever_treated" value="no" id="treated_no" required>
-                            <label for="treated_no">Nei</label>
+                            <label for="treated_no">Nei, eller behandling fra egen hånd.</label>
                         </div>
                     </div>
                 </div>
@@ -796,11 +813,11 @@
                 <div id="treatmentQuestions" style="display: none;">
                     <div class="question-group">
                         <label class="question-label">
-                            Når mottok du først behandling for AD? <span class="required">*</span>
+                            Når fikk du din første behandling for atopisk eksem? <span class="required">*</span>
                         </label>
                         <div class="select-wrapper">
                             <select name="first_treatment" class="form-select"> 
-                                <option value="">Velg aldersgruppe</option>
+                                <option value="">Velg aldersgruppe (trykk her for å velge)</option>
                                 <option value="primary_school">Før eller i løpet av barneskolen (≤12 år)</option>
                                 <option value="lower_secondary">I løpet av ungdomsskolen (13–15 år)</option>
                                 <option value="upper_secondary">I løpet av videregående skole (16–19 år)</option>
@@ -818,7 +835,7 @@
                     
                     <div class="question-group">
                         <label class="question-label">
-                            Tar du for tiden oral medisin (tabletter) for atopisk dermatitt? <span class="required">*</span>
+                            Tar du for tiden oral medisin (tabletter) for atopisk eksem? <span class="required">*</span>
                         </label>
                         <div class="radio-group">
                             <div class="radio-option">
@@ -867,14 +884,14 @@
                             </div>
                             <div class="checkbox-option">
                                 <input type="checkbox" name="current_oral_meds" value="other_oral" id="oral_other">
-                                <label for="oral_other">Annen oral medisin</label>
+                                <label for="oral_other">Annen oral medisin (tabletter), eller husker ikke</label>
                             </div>
                         </div>
                     </div>
                     
                     <div class="question-group">
                         <label class="question-label">
-                            Mottar du for tiden injeksjonsbehandling for atopisk dermatitt? <span class="required">*</span>
+                            Mottar du for tiden sprøytebehandling for atopisk eksem? <span class="required">*</span>
                         </label>
                         <div class="radio-group">
                             <div class="radio-option">
@@ -890,12 +907,12 @@
                     
                     <div class="question-group hidden" id="currentInjectableMedsQuestion">
                         <label class="question-label">
-                            Hvilken/hvilke injeksjonsbehandlinger mottar du for tiden? (Velg alle som passer)
+                            Hvilken/hvilke sprøytebehandlinger mottar du for tiden? (Velg alle som passer)
                         </label>
                         <div class="checkbox-group">
                             <div class="checkbox-option">
                                 <input type="checkbox" name="current_injectable_meds" value="methotrexate_injection" id="inject_methotrexate">
-                                <label for="inject_methotrexate">Metotreksat autoinjektor (Metex / Methofill / Nordimet)</label>
+                                <label for="inject_methotrexate">Metotreksat sprøyte (Metex / Methofill / Nordimet)</label>
                             </div>
                             <div class="checkbox-option">
                                 <input type="checkbox" name="current_injectable_meds" value="lebrikizumab" id="inject_lebrikizumab">
@@ -907,14 +924,14 @@
                             </div>
                             <div class="checkbox-option">
                                 <input type="checkbox" name="current_injectable_meds" value="other_injectable" id="inject_other">
-                                <label for="inject_other">Annen injeksjonsbehandling</label>
+                                <label for="inject_other">Annen sprøytebehandling, eller husker ikke</label>
                             </div>
                         </div>
                     </div>
                     
                     <div class="question-group">
                         <label class="question-label">
-                            Bruker du for tiden topikal behandling (kremer, salver, lotioner) for atopisk dermatitt? <span class="required">*</span>
+                            Bruker du for tiden lokalbehandling (kremer, salver, lotioner) for atopisk eksem? <span class="required">*</span>
                         </label>
                         <div class="radio-group">
                             <div class="radio-option">
@@ -930,23 +947,27 @@
                     
                     <div class="question-group hidden" id="currentTopicalMedsQuestion">
                         <label class="question-label">
-                            Hvilken topikal behandling bruker du for tiden? (Velg alle som passer)
+                            Hvilken lokalbehandling bruker du for tiden? (Velg alle som passer)
                         </label>
                         <div class="checkbox-group">
                             <div class="checkbox-option">
                                 <input type="checkbox" name="current_topical_meds" value="corticosteroid" id="topical_corticosteroid">
-                                <label for="topical_corticosteroid">Topikalt kortikosteroid</label>
+                                <label for="topical_corticosteroid">Reseptbelagt krem</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" name="current_topical_meds" value="generic_cream" id="generic_cream">
+                                <label for="generic_cream">Ikke reseptbelagt krem</label>
                             </div>
                             <div class="checkbox-option">
                                 <input type="checkbox" name="current_topical_meds" value="other_topical" id="topical_other">
-                                <label for="topical_other">Annen topikal behandling</label>
+                                <label for="topical_other">Annen lokalbehandling, eller husker ikke</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="question-group">
                         <label class="question-label">
-                            Mottar du for tiden lysbehandling for atopisk dermatitt? <span class="required">*</span>
+                            Mottar du for tiden lysbehandling for atopisk eksem? <span class="required">*</span>
                         </label>
                         <div class="radio-group">
                             <div class="radio-option">
@@ -962,7 +983,7 @@
 
                     <div class="question-group">
                         <label class="question-label">
-                            Bruker du noen annen form for behandling (f.eks. komplementære eller alternative midler)? <span class="required">*</span>
+                            Bruker du noen annen form for behandling (f.eks. tillegsbehandling eller alternativmedisin)? <span class="required">*</span>
                         </label>
                         <div class="radio-group">
                             <div class="radio-option">
@@ -978,7 +999,7 @@
                     
                     <div class="question-group" id="currentNoTreatmentAnyQuestionGroup">
                         <label class="question-label">
-                            Mottar du for tiden ingen behandling for atopisk dermatitt? <span class="required">*</span>
+                            Mottar du for tiden ingen behandling for atopisk eksem? <span class="required">*</span>
                         </label>
                         <div class="radio-group">
                             <div class="radio-option">
@@ -992,68 +1013,31 @@
                         </div>
                     </div>
 
-                    <div class="question-group">
-                        <label class="question-label">
-                            Er du fornøyd med nåværende behandling? (0-10 skala, hvor 0 = ikke fornøyd i det hele tatt, 10 = helt fornøyd) <span class="required">*</span>
-                        </label>
-                        <div class="scale-group">
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="0" id="satisfaction_0"> 
-                                <label for="satisfaction_0">0</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="1" id="satisfaction_1">
-                                <label for="satisfaction_1">1</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="2" id="satisfaction_2">
-                                <label for="satisfaction_2">2</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="3" id="satisfaction_3">
-                                <label for="satisfaction_3">3</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="4" id="satisfaction_4">
-                                <label for="satisfaction_4">4</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="5" id="satisfaction_5">
-                                <label for="satisfaction_5">5</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="6" id="satisfaction_6">
-                                <label for="satisfaction_6">6</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="7" id="satisfaction_7">
-                                <label for="satisfaction_7">7</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="8" id="satisfaction_8">
-                                <label for="satisfaction_8">8</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="9" id="satisfaction_9">
-                                <label for="satisfaction_9">9</label>
-                            </div>
-                            <div class="scale-option">
-                                <input type="radio" name="treatment_satisfaction" value="10" id="satisfaction_10">
-                                <label for="satisfaction_10">10</label>
-                            </div>
-                        </div>
-                    </div>
+					<div class="question-group">
+						<label class="question-label">
+							Er du fornøyd med nåværende behandling? (0–10 skala, hvor 0 = ikke fornøyd i det hele tatt, 10 = helt fornøyd) <span class="required">*</span>
+						</label>
+						<div class="slider-input-group">
+							<input type="range" name="satisfaction_slider" class="slider-input" min="0" max="10" value="0" id="satisfactionSlider" required>
+							<input type="number" name="satisfaction" class="form-input slider-number" min="0" max="10" value="0" id="satisfactionNumber" required>
+						</div>
+						<div style="margin-top: 8px; color: #888; font-size:0.95em; text-align:center;">
+							0: Ikke fornøyd i det hele tatt<br>
+							10: Helt fornøyd
+						</div>
+					</div>
+
                 </div>
             </div>
 
             <!-- Past Treatment Section -->
             <div class="section" id="past-treatment">
                 <h2 class="section-title">Informasjon om tidligere behandling</h2>
-                <p style="margin-bottom: 30px; text-align: center; color: #666;">Fortell oss om AD-behandlinger du har brukt tidligere, men som du ikke lenger bruker.</p>
+                <p style="margin-bottom: 30px; text-align: center; color: #666;">Fortell oss om atopisk eksem-behandlinger du har brukt tidligere, men som du ikke lenger bruker.</p>
 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du tidligere tatt orale medisiner for AD som du ikke lenger tar? <span class="required">*</span>
+                        Har du tidligere tatt orale medisiner for atopisk eksem som du ikke lenger tar? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -1068,7 +1052,7 @@
                 </div>
                 <div class="question-group hidden" id="pastOralMedsQuestion">
                     <label class="question-label">
-                        Hvilken/hvilke tidligere orale medisiner for AD har du tatt? (Velg alle som passer)
+                        Hvilken/hvilke tidligere orale medisiner for atopisk eksem har du tatt? (Velg alle som passer)
                     </label>
                     <div class="checkbox-group">
                         <div class="checkbox-option">
@@ -1101,14 +1085,14 @@
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="past_oral_meds" value="other_oral" id="past_oral_other">
-                            <label for="past_oral_other">Annen oral medisin</label>
+                            <label for="past_oral_other">Annen oral medisin (tabletter)</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du tidligere mottatt injeksjonsbehandlinger for AD som du ikke lenger mottar? <span class="required">*</span>
+                        Har du tidligere mottatt sprøytebehandlinger for atopisk eksem som du ikke lenger mottar? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -1123,12 +1107,12 @@
                 </div>
                 <div class="question-group hidden" id="pastInjectableMedsQuestion">
                     <label class="question-label">
-                        Hvilken/hvilke tidligere injeksjonsbehandlinger for AD har du mottatt? (Velg alle som passer)
+                        Hvilken/hvilke tidligere sprøytebehandlinger for atopisk eksem har du mottatt? (Velg alle som passer)
                     </label>
                     <div class="checkbox-group">
                         <div class="checkbox-option">
                             <input type="checkbox" name="past_injectable_meds" value="methotrexate_injection" id="past_inject_methotrexate">
-                            <label for="past_inject_methotrexate">Metotreksat autoinjektor (Metex / Methofill / Nordimet)</label>
+                            <label for="past_inject_methotrexate">Metotreksat sprøyte (Metex / Methofill / Nordimet)</label>
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="past_injectable_meds" value="lebrikizumab" id="past_inject_lebrikizumab">
@@ -1140,14 +1124,14 @@
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="past_injectable_meds" value="other_injectable" id="past_inject_other">
-                            <label for="past_inject_other">Annen injeksjonsbehandling</label>
+                            <label for="past_inject_other">Annen sprøytebehandling</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du tidligere brukt topikal behandling for AD som du ikke lenger bruker? <span class="required">*</span>
+                        Har du tidligere brukt lokalbehandling for atopisk eksem som du ikke lenger bruker? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -1162,7 +1146,7 @@
                 </div>
                 <div class="question-group hidden" id="pastTopicalMedsQuestion">
                     <label class="question-label">
-                        Hvilken tidligere topikal behandling for AD har du brukt? (Velg alle som passer)
+                        Hvilken tidligere lokalbehandling for atopisk eksem har du brukt? (Velg alle som passer)
                     </label>
                     <div class="checkbox-group">
                         <div class="checkbox-option">
@@ -1171,14 +1155,14 @@
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="past_topical_meds" value="other_topical" id="past_topical_other">
-                            <label for="past_topical_other">Annen topikal behandling</label>
+                            <label for="past_topical_other">Annen lokalbehandling</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du tidligere mottatt lysbehandling for atopisk dermatitt som du ikke lenger mottar? <span class="required">*</span>
+                        Har du tidligere mottatt lysbehandling for atopisk eksem som du ikke lenger mottar? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -1194,7 +1178,7 @@
 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du tidligere brukt noen annen form for behandling (f.eks. komplementære eller alternative midler) som du ikke lenger bruker? <span class="required">*</span>
+                        Har du tidligere brukt noen annen form for behandling (f.eks. tillegsbehandling eller alternativmedisin) som du ikke lenger bruker? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -1210,7 +1194,7 @@
 
                 <div class="question-group">
                     <label class="question-label">
-                        Har du noen gang hatt en periode uten noen behandling for atopisk dermatitt? <span class="required">*</span>
+                        Har du noen gang hatt en periode uten noen behandling for atopisk eksem? <span class="required">*</span>
                     </label>
                     <div class="radio-group">
                         <div class="radio-option">
@@ -1227,11 +1211,11 @@
             
             <!-- Comorbidities Section -->
             <div class="section" id="comorbidities">
-                <h2 class="section-title">Komorbiditeter (Samsykelighet)</h2>
+                <h2 class="section-title">Følgesykdommer (Komorbiditeter)</h2>
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Mottar du behandling for astma, allergi eller rhinosinusitt? (Velg alle som passer)
+                        Mottar du behandling for astma, allergi og/eller rhinosinusitt? (Velg alle som passer)
                     </label>
                     <div class="checkbox-group">
                         <div class="checkbox-option">
@@ -1251,12 +1235,12 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Mottar du behandling for diabetes, hjerte- og karsykdommer eller osteoporose (beinskjørhet)? (Velg alle som passer)
+                        Mottar du behandling for sukkersyke (diabetes), hjerte- og karsykdommer og/eller osteoporose (beinskjørhet)? (Velg alle som passer)
                     </label>
                     <div class="checkbox-group">
                         <div class="checkbox-option">
                             <input type="checkbox" name="metabolic_comorbidities" value="diabetes" id="comorbid_diabetes">
-                            <label for="comorbid_diabetes">Diabetes</label>
+                            <label for="comorbid_diabetes">Sukkersyke (Diabetes)</label>
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="metabolic_comorbidities" value="cardiovascular" id="comorbid_cvd">
@@ -1271,7 +1255,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Mottar du behandling for depresjon, ADHD eller angst? (Velg alle som passer)
+                        Mottar du behandling for depresjon, ADHD og/eller angst? (Velg alle som passer)
                     </label>
                     <div class="checkbox-group">
                         <div class="checkbox-option">
@@ -1296,7 +1280,7 @@
                 
                 <div class="question-group">
                     <label class="question-label">
-                        Hvor stor del av kroppen din er dekket av AD? <span class="required">*</span>
+                        Hvor stor del av kroppen din er dekket av atopisk eksem? Én håndflate tilsvarer 1% av kroppsarealet. <span class="required">*</span>
                     </label>
                     <div class="select-wrapper">
                         <select name="body_coverage" class="form-select" required>
@@ -1315,134 +1299,49 @@
                     </div>
                 </div>
                 
-                <div class="question-group">
-                    <label class="question-label">
-                        Hvor mange dager i løpet av den siste uken har symptomene dine plaget deg? <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="0" id="symptoms_0" required>
-                            <label for="symptoms_0">0</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="1" id="symptoms_1" required>
-                            <label for="symptoms_1">1</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="2" id="symptoms_2" required>
-                            <label for="symptoms_2">2</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="3" id="symptoms_3" required>
-                            <label for="symptoms_3">3</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="4" id="symptoms_4" required>
-                            <label for="symptoms_4">4</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="5" id="symptoms_5" required>
-                            <label for="symptoms_5">5</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="6" id="symptoms_6" required>
-                            <label for="symptoms_6">6</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="symptoms_days" value="7" id="symptoms_7" required>
-                            <label for="symptoms_7">7</label>
-                        </div>
-                    </div>
-                </div>
+				<div class="question-group">
+					<label class="question-label">
+						Hvor mange dager i løpet av den siste uken har symptomene dine plaget deg? <span class="required">*</span>
+					</label>
+					<div class="slider-input-group">
+						<input type="range" name="symptoms_days_slider" class="slider-input" min="0" max="7" value="0" id="symptomsDaysSlider" required>
+						<input type="number" name="symptoms_days" class="form-input slider-number" min="0" max="7" value="0" id="symptomsDaysNumber" required>
+					</div>
+				</div>
+                
+				<div class="question-group">
+					<label class="question-label">
+						På en skala fra 0 til 10, hvor 0 er "ingen kløe" og 10 er "verst tenkelige kløe", hvordan vil du vurdere kløen din på det verste øyeblikket i løpet av de siste 24 timene? <span class="required">*</span>
+					</label>
+					<div class="slider-input-group">
+						<input type="range" name="itch_scale_slider" class="slider-input" min="0" max="10" value="0" id="itchScaleSlider" required>
+						<input type="number" name="itch_scale" class="form-input slider-number" min="0" max="10" value="0" id="itchScaleNumber" required>
+					</div>
+				</div>
+
+                
+				<div class="question-group">
+					<label class="question-label">
+						I hvilken grad forstyrret kløen din søvnen i natt? <span class="required">*</span>
+					</label>
+					<div class="slider-input-group">
+						<input type="range" name="sleep_interference_slider" class="slider-input" min="0" max="4" value="0" id="sleepInterferenceSlider" required>
+						<input type="number" name="sleep_interference" class="form-input slider-number" min="0" max="4" value="0" id="sleepInterferenceNumber" required>
+					</div>
+					<div style="margin-top: 8px; text-align:center; color:#888;">
+						0 = Ikke i det hele tatt, 1 = Litt, 2 = Moderat, 3 = Mye, 4 = Ekstremt
+					</div>
+				</div>
+
                 
                 <div class="question-group">
                     <label class="question-label">
-                        På en skala fra 0 til 10, hvor 0 er "ingen kløe" og 10 er "verst tenkelige kløe", hvordan vil du vurdere kløen din på det verste øyeblikket i løpet av de siste 24 timene? <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="0" id="itch_0" required>
-                            <label for="itch_0">0</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="1" id="itch_1" required>
-                            <label for="itch_1">1</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="2" id="itch_2" required>
-                            <label for="itch_2">2</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="3" id="itch_3" required>
-                            <label for="itch_3">3</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="4" id="itch_4" required>
-                            <label for="itch_4">4</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="5" id="itch_5" required>
-                            <label for="itch_5">5</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="6" id="itch_6" required>
-                            <label for="itch_6">6</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="7" id="itch_7" required>
-                            <label for="itch_7">7</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="8" id="itch_8" required>
-                            <label for="itch_8">8</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="9" id="itch_9" required>
-                            <label for="itch_9">9</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="itch_scale" value="10" id="itch_10" required>
-                            <label for="itch_10">10</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        I hvilken grad forstyrret kløen din søvnen i natt? <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="sleep_interference" value="0" id="sleep_0" required>
-                            <label for="sleep_0">0<br><small>Ikke i det hele tatt</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="sleep_interference" value="1" id="sleep_1" required>
-                            <label for="sleep_1">1<br><small>Litt</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="sleep_interference" value="2" id="sleep_2" required>
-                            <label for="sleep_2">2<br><small>Moderat</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="sleep_interference" value="3" id="sleep_3" required>
-                            <label for="sleep_3">3<br><small>Mye</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="sleep_interference" value="4" id="sleep_4" required>
-                            <label for="sleep_4">4<br><small>Ekstremt</small></label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        Hvilke kroppsdeler er påvirket av atopisk dermatitt? (Velg alle som passer) <span class="required">*</span>
+                        Hvilke kroppsdeler er påvirket av atopisk eksem? (Velg alle som passer) <span class="required">*</span>
                     </label>
                     <div class="checkbox-group" id="affectedBodyPartsGroup">
                         <div class="checkbox-option">
                             <input type="checkbox" name="affected_body_parts" value="head_neck" id="body_head_neck">
-                            <label for="body_head_neck">Hode og nakke</label>
+                            <label for="body_head_neck">Hode, ansikt og nakke</label>
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="affected_body_parts" value="arms" id="body_arms">
@@ -1454,7 +1353,7 @@
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="affected_body_parts" value="legs" id="body_legs">
-                            <label for="body_legs">Bein</label>
+                            <label for="body_legs">Bein/føtter</label>
                         </div>
                         <div class="checkbox-option">
                             <input type="checkbox" name="affected_body_parts" value="genitals" id="body_genitals">
@@ -1723,171 +1622,168 @@
                 </div>
             </div>
             
-            <!-- WHO-5 Section -->
-            <div class="section" id="who5">
-                <h2 class="section-title">WHO-5 Trivselsindeks</h2>
-                <p style="margin-bottom: 30px; text-align: center; color: #666;">Vennligst angi for hver av de fem påstandene hva som ligger nærmest hvordan du har følt deg de siste to ukene.</p>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        Jeg har vært glad og i godt humør <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="who5_1" value="5" id="who1_5" required>
-                            <label for="who1_5">5<br><small>Hele tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_1" value="4" id="who1_4" required>
-                            <label for="who1_4">4<br><small>Mesteparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_1" value="3" id="who1_3" required>
-                            <label for="who1_3">3<br><small>Mer enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_1" value="2" id="who1_2" required>
-                            <label for="who1_2">2<br><small>Mindre enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_1" value="1" id="who1_1" required>
-                            <label for="who1_1">1<br><small>Noe av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_1" value="0" id="who1_0" required>
-                            <label for="who1_0">0<br><small>Ikke på noe tidspunkt</small></label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        Jeg har følt meg rolig og avslappet <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="who5_2" value="5" id="who2_5" required>
-                            <label for="who2_5">5<br><small>Hele tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_2" value="4" id="who2_4" required>
-                            <label for="who2_4">4<br><small>Mesteparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_2" value="3" id="who2_3" required>
-                            <label for="who2_3">3<br><small>Mer enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_2" value="2" id="who2_2" required>
-                            <label for="who2_2">2<br><small>Mindre enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_2" value="1" id="who2_1" required>
-                            <label for="who2_1">1<br><small>Noe av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_2" value="0" id="who2_0" required>
-                            <label for="who2_0">0<br><small>Ikke på noe tidspunkt</small></label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        Jeg har følt meg aktiv og energisk <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="who5_3" value="5" id="who3_5" required>
-                            <label for="who3_5">5<br><small>Hele tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_3" value="4" id="who3_4" required>
-                            <label for="who3_4">4<br><small>Mesteparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_3" value="3" id="who3_3" required>
-                            <label for="who3_3">3<br><small>Mer enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_3" value="2" id="who3_2" required>
-                            <label for="who3_2">2<br><small>Mindre enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_3" value="1" id="who3_1" required>
-                            <label for="who3_1">1<br><small>Noe av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_3" value="0" id="who3_0" required>
-                            <label for="who3_0">0<br><small>Ikke på noe tidspunkt</small></label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        Jeg har våknet og følt meg frisk og uthvilt <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="who5_4" value="5" id="who4_5" required>
-                            <label for="who4_5">5<br><small>Hele tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_4" value="4" id="who4_4" required>
-                            <label for="who4_4">4<br><small>Mesteparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_4" value="3" id="who4_3" required>
-                            <label for="who4_3">3<br><small>Mer enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_4" value="2" id="who4_2" required>
-                            <label for="who4_2">2<br><small>Mindre enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_4" value="1" id="who4_1" required>
-                            <label for="who4_1">1<br><small>Noe av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_4" value="0" id="who4_0" required>
-                            <label for="who4_0">0<br><small>Ikke på noe tidspunkt</small></label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        Mitt daglige liv har vært fylt med ting som interesserer meg <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="who5_5" value="5" id="who5_5" required>
-                            <label for="who5_5">5<br><small>Hele tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_5" value="4" id="who5_4" required>
-                            <label for="who5_4">4<br><small>Mesteparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_5" value="3" id="who5_3" required>
-                            <label for="who5_3">3<br><small>Mer enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_5" value="2" id="who5_2" required>
-                            <label for="who5_2">2<br><small>Mindre enn halvparten av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_5" value="1" id="who5_1" required>
-                            <label for="who5_1">1<br><small>Noe av tiden</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="who5_5" value="0" id="who5_0" required>
-                            <label for="who5_0">0<br><small>Ikke på noe tidspunkt</small></label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+			<!-- WHO-5 Section -->
+			<div class="section" id="who5">
+				<h2 class="section-title">WHO-5 Trivselsindeks</h2>
+				<p style="margin-bottom: 30px; text-align: center; color: #666;">Vennligst angi for hver av de fem påstandene hva som ligger nærmest hvordan du har følt deg <b>de siste to ukene.</b></p>
+				
+				<div class="question-group">
+					<label class="question-label">
+						Jeg har følt meg glad og i godt humør <span class="required">*</span>
+					</label>
+					<div class="radio-group">
+						<div class="radio-option">
+							<input type="radio" name="who5_1" value="5" id="who1_5" required>
+							<label for="who1_5">Hele tiden <span style="font-weight:normal"></span></label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_1" value="4" id="who1_4" required>
+							<label for="who1_4">Det meste av tiden <span style="font-weight:normal"></span></label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_1" value="3" id="who1_3" required>
+							<label for="who1_3">Mer enn halve tiden<span style="font-weight:normal"></span></label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_1" value="2" id="who1_2" required>
+							<label for="who1_2">Mindre enn halve tiden<span style="font-weight:normal"></span></label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_1" value="1" id="who1_1" required>
+							<label for="who1_1">Av og til<span style="font-weight:normal"></span></label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_1" value="0" id="who1_0" required>
+							<label for="who1_0">Aldri<span style="font-weight:normal"></span></label>
+						</div>
+					</div>
+				</div>
+				<div class="question-group">
+					<label class="question-label">
+						Jeg har følt meg rolig og avslappet <span class="required">*</span>
+					</label>
+					<div class="radio-group">
+						<div class="radio-option">
+							<input type="radio" name="who5_2" value="5" id="who2_5" required>
+							<label for="who2_5">Hele tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_2" value="4" id="who2_4" required>
+							<label for="who2_4">Det meste av tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_2" value="3" id="who2_3" required>
+							<label for="who2_3">Mer enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_2" value="2" id="who2_2" required>
+							<label for="who2_2">Mindre enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_2" value="1" id="who2_1" required>
+							<label for="who2_1">Av og til</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_2" value="0" id="who2_0" required>
+							<label for="who2_0">Aldri</label>
+						</div>
+					</div>
+				</div>
+				<div class="question-group">
+					<label class="question-label">
+						Jeg har følt meg aktiv og sterk <span class="required">*</span>
+					</label>
+					<div class="radio-group">
+						<div class="radio-option">
+							<input type="radio" name="who5_3" value="5" id="who3_5" required>
+							<label for="who3_5">Hele tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_3" value="4" id="who3_4" required>
+							<label for="who3_4">Det meste av tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_3" value="3" id="who3_3" required>
+							<label for="who3_3">Mer enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_3" value="2" id="who3_2" required>
+							<label for="who3_2">Mindre enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_3" value="1" id="who3_1" required>
+							<label for="who3_1">Av og til</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_3" value="0" id="who3_0" required>
+							<label for="who3_0">Aldri</label>
+						</div>
+					</div>
+				</div>
+				<div class="question-group">
+					<label class="question-label">
+						Jeg har følt meg opplagt og utvilt når jeg våkner<span class="required">*</span>
+					</label>
+					<div class="radio-group">
+						<div class="radio-option">
+							<input type="radio" name="who5_4" value="5" id="who4_5" required>
+							<label for="who4_5">Hele tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_4" value="4" id="who4_4" required>
+							<label for="who4_4">Det meste</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_4" value="3" id="who4_3" required>
+							<label for="who4_3">Mer enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_4" value="2" id="who4_2" required>
+							<label for="who4_2">Mindre enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_4" value="1" id="who4_1" required>
+							<label for="who4_1">Av og til</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_4" value="0" id="who4_0" required>
+							<label for="who4_0">Aldri</label>
+						</div>
+					</div>
+				</div>
+				<div class="question-group">
+					<label class="question-label">
+						Jeg har følt meg at mitt daglige liv har vært fylt av ting som interesserer meg <span class="required">*</span>
+					</label>
+					<div class="radio-group">
+						<div class="radio-option">
+							<input type="radio" name="who5_5" value="5" id="who5_5" required>
+							<label for="who5_5">Hele tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_5" value="4" id="who5_4" required>
+							<label for="who5_4">Det meste av tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_5" value="3" id="who5_3" required>
+							<label for="who5_3">Mer enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_5" value="2" id="who5_2" required>
+							<label for="who5_2">Mindre enn halve tiden</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_5" value="1" id="who5_1" required>
+							<label for="who5_1">Av og til</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="who5_5" value="0" id="who5_0" required>
+							<label for="who5_0">Aldri</label>
+						</div>
+					</div>
+				</div>
+			</div>
+
             
             <!-- POEM Section -->
             <div class="section" id="poem">
@@ -2434,144 +2330,100 @@
             </div>
             
             <!-- WPAI Section -->
-            <div class="section" id="wpai">
-                <h2 class="section-title">WPAI (Work Productivity and Activity Impairment)</h2>
-                <p style="margin-bottom: 30px; text-align: center; color: #666;">De følgende spørsmålene handler om effekten av helseproblemene dine på din evne til å jobbe og utføre vanlige aktiviteter. Vennligst fyll ut feltene eller velg et tall som angitt.</p>
-                
-                <div class="question-group">
-                    <label class="question-label" for="wpai1Number">
-                        I løpet av de siste sju dagene, hvor mange timer var du borte fra jobb på grunn av helseproblemene dine? <span class="required">*</span>
-                    </label>
-                     <div class="slider-input-group">
-                        <input type="range" name="wpai_1_slider" class="slider-input" min="0" max="168" step="0.5" value="0" id="wpai1Slider">
-                        <input type="number" name="wpai_1" class="form-input slider-number" min="0" max="168" step="0.5" value="0" id="wpai1Number" required>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label" for="wpai2Number">
-                        I løpet av de siste sju dagene, hvor mange timer var du borte fra jobb av en annen grunn, som ferie, helligdager, eller fri for å delta i denne studien? <span class="required">*</span>
-                    </label>
-                    <div class="slider-input-group">
-                        <input type="range" name="wpai_2_slider" class="slider-input" min="0" max="168" step="0.5" value="0" id="wpai2Slider">
-                        <input type="number" name="wpai_2" class="form-input slider-number" min="0" max="168" step="0.5" value="0" id="wpai2Number" required>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label" for="wpai3Number">
-                        I løpet av de siste sju dagene, hvor mange timer jobbet du faktisk? <span class="required">*</span>
-                    </label>
-                     <div class="slider-input-group">
-                        <input type="range" name="wpai_3_slider" class="slider-input" min="0" max="168" step="0.5" value="0" id="wpai3Slider">
-                        <input type="number" name="wpai_3" class="form-input slider-number" min="0" max="168" step="0.5" value="0" id="wpai3Number" required>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        I løpet av de siste sju dagene, hvor mye påvirket helseproblemene dine produktiviteten din mens du jobbet? (0 = helseproblemer hadde ingen effekt på arbeidet mitt, 10 = helseproblemer forhindret meg helt fra å jobbe) <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="0" id="wpai4_0" required>
-                            <label for="wpai4_0">0<br><small>Ingen effekt</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="1" id="wpai4_1" required>
-                            <label for="wpai4_1">1</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="2" id="wpai4_2" required>
-                            <label for="wpai4_2">2</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="3" id="wpai4_3" required>
-                            <label for="wpai4_3">3</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="4" id="wpai4_4" required>
-                            <label for="wpai4_4">4</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="5" id="wpai4_5" required>
-                            <label for="wpai4_5">5</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="6" id="wpai4_6" required>
-                            <label for="wpai4_6">6</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="7" id="wpai4_7" required>
-                            <label for="wpai4_7">7</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="8" id="wpai4_8" required>
-                            <label for="wpai4_8">8</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="9" id="wpai4_9" required>
-                            <label for="wpai4_9">9</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_4" value="10" id="wpai4_10" required>
-                            <label for="wpai4_10">10<br><small>Helt forhindret</small></label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="question-group">
-                    <label class="question-label">
-                        I løpet av de siste sju dagene, hvor mye påvirket helseproblemene dine din evne til å utføre vanlige daglige aktiviteter, utenom jobb? (0 = helseproblemer hadde ingen effekt på mine daglige aktiviteter, 10 = helseproblemer forhindret meg helt fra å utføre mine daglige aktiviteter) <span class="required">*</span>
-                    </label>
-                    <div class="scale-group">
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="0" id="wpai5_0" required>
-                            <label for="wpai5_0">0<br><small>Ingen effekt</small></label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="1" id="wpai5_1" required>
-                            <label for="wpai5_1">1</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="2" id="wpai5_2" required>
-                            <label for="wpai5_2">2</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="3" id="wpai5_3" required>
-                            <label for="wpai5_3">3</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="4" id="wpai5_4" required>
-                            <label for="wpai5_4">4</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="5" id="wpai5_5" required>
-                            <label for="wpai5_5">5</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="6" id="wpai5_6" required>
-                            <label for="wpai5_6">6</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="7" id="wpai5_7" required>
-                            <label for="wpai5_7">7</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="8" id="wpai5_8" required>
-                            <label for="wpai5_8">8</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="9" id="wpai5_9" required>
-                            <label for="wpai5_9">9</label>
-                        </div>
-                        <div class="scale-option">
-                            <input type="radio" name="wpai_5" value="10" id="wpai5_10" required>
-                            <label for="wpai5_10">10<br><small>Helt forhindret</small></label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+			<div class="section" id="wpai">
+				<h2 class="section-title">WPAI (Work Productivity and Activity Impairment)</h2>
+				<!-- Work status question -->
+				<div class="question-group">
+					<label class="question-label">
+						Er du for tiden i arbeid (arbeid for betaling)? <span class="required">*</span>
+					</label>
+					<div class="radio-group" id="wpaiWorkingGroup">
+						<div class="radio-option">
+							<input type="radio" name="wpai_working" value="yes" id="wpai_working_yes" required>
+							<label for="wpai_working_yes">Ja</label>
+						</div>
+						<div class="radio-option">
+							<input type="radio" name="wpai_working" value="no" id="wpai_working_no" required>
+							<label for="wpai_working_no">Nei</label>
+						</div>
+					</div>
+				</div>
+				<!-- Info box -->
+				<div id="wpaiInfoBox" style="margin: 24px 0; background: #f8f9fa; padding: 16px; border-radius: 8px; text-align: center; font-size: 1.1em;">
+					De neste spørsmålene gjelder de <b>siste sju dagene.</b> Dagen i dag skal ikke medregnes.
+				</div>
+				<!-- Employed questions (shown only if 'Ja' is selected) -->
+				<div id="wpaiEmployedQuestions">
+					<!-- SLIDER 1 -->
+					<div class="question-group" id="wpaiHoursQ1">
+						<label class="question-label">
+							2) 	Hvor mange timer fravær har du hatt fra jobben på grunn av <u>dine helseproblemer</u> i løpet av de siste sju dagene? <span class="required">*</span> <div style="margin-top: 8px; color: #888; font-size:0.95em"><i>Regn sammen antallet timer du var fraværende i forbindelse med sykedager, ganger du kom for sent, gikk hjem tidlig, osv. på grunn av helseproblemene. Regn ikke med tiden du er fraværende for å delta i denne undersøkelsen.</i></div>
+						</label>
+						<div class="slider-input-group">
+							<input type="range" name="wpai_hours_should_work_slider" class="slider-input" min="0" max="168" value="0" id="wpaiHoursShouldWorkSlider" required>
+							<input type="number" name="wpai_hours_should_work" class="form-input slider-number" min="0" max="168" value="0" id="wpaiHoursShouldWorkNumber" required>
+						</div>
+						<div style="margin-top: 8px; color: #888; font-size:0.95em; text-align:center;">
+							0–168 timer (maks 24 timer x 7 dager)
+						</div>
+					</div>
+					<!-- SLIDER 2 -->
+					<div class="question-group" id="wpaiHoursQ2">
+						<label class="question-label">
+							3) 	Hvor mange timer fravær har du hatt fra jobben av andre årsaker i løpet av de siste sju dagene, for eksempel ferie, helligdager, fravær for å delta i denne undersøkelsen? <span class="required">*</span>
+						</label>
+						<div class="slider-input-group">
+							<input type="range" name="wpai_hours_missed_health_slider" class="slider-input" min="0" max="168" value="0" id="wpaiHoursMissedHealthSlider" required>
+							<input type="number" name="wpai_hours_missed_health" class="form-input slider-number" min="0" max="168" value="0" id="wpaiHoursMissedHealthNumber" required>
+						</div>
+						<div style="margin-top: 8px; color: #888; font-size:0.95em; text-align:center;">
+							0–168 timer (maks 24 timer x 7 dager)
+						</div>
+					</div>
+					<!-- SLIDER 3 -->
+					<div class="question-group" id="wpaiHoursQ3">
+						<label class="question-label">
+							4) 	Hvor mange timer har du faktisk arbeidet i løpet av de siste sju dagene? <span class="required">*</span>
+						</label>
+						<div class="slider-input-group">
+							<input type="range" name="wpai_hours_missed_other_slider" class="slider-input" min="0" max="168" value="0" id="wpaiHoursMissedOtherSlider" required>
+							<input type="number" name="wpai_hours_missed_other" class="form-input slider-number" min="0" max="168" value="0" id="wpaiHoursMissedOtherNumber" required>
+						</div>
+						<div style="margin-top: 8px; color: #888; font-size:0.95em; text-align:center;">
+							0–168 timer (maks 24 timer x 7 dager)
+						</div>
+					</div>
+					<!-- Presenteeism slider -->
+					<div class="question-group" id="wpaiPresenteeismGroup">
+						<label class="question-label">
+							Hvor stor innvirkning hadde dine helseproblemer på din produktivitet <u>mens du arbeidet</u> i løpet av de siste sju dagene? (0–10) <span class="required">*</span> <div style="margin-top: 8px; color: #888; font-size:0.95em"><i>Tenk tilbake på dager da det var begrenset hvor mye du kunne gjøre eller hva slags arbeid du kunne utføre, dager du oppnådde mindre enn du ønsket, eller dager da du ikke kunne utføre arbeidet like omhyggelig som vanlig. Hvis helseproblemer innvirket bare litt på arbeidet, velger du et lavt tall. Velg et høyere tall hvis helseproblemer hadde stor innvirkning på arbeidet.</i></div>
+						</label>
+						<div class="slider-input-group">
+							<input type="range" name="wpai_presenteeism_slider" class="slider-input" min="0" max="10" value="0" id="wpaiPresenteeismSlider" required>
+							<input type="number" name="wpai_presenteeism" class="form-input slider-number" min="0" max="10" value="0" id="wpaiPresenteeismNumber" required>
+						</div>
+						<div style="margin-top: 8px; color: #888; font-size:0.95em; text-align:center;">
+							0: Helseproblemer hadde ingen innvirkning på arbeidet mitt<br>
+							10: Helseproblemer hindret meg fullstendig i å utføre arbeidet mitt
+						</div>
+					</div>
+				</div>
+				<!-- Activity impairment slider (always shown) -->
+				<div class="question-group" id="wpaiDailyActivityGroup">
+					<label class="question-label">
+						Hvor stor innvirkning hadde dine helseproblemer på din evne til å utføre vanlige, daglige 	aktiviteter, utenom arbeid i løpet av de siste sju dagene? <span class="required">*</span> <div style="margin-top: 8px; color: #888; font-size:0.95em"><i>Med vanlige aktiviteter mener vi de 	vanlige aktivitetene du utfører, f.eks. husarbeid, handling, omsorg for barn, trening, studering, 	osv. Tenk tilbake på de gangene det var begrenset hvor mye du kunne gjøre eller hva slags 	aktiviteter du kunne delta i, foruten hvor mange ganger du fikk gjort mindre enn du ønsket. Hvis 	helseproblemer innvirket bare litt på dine aktiviteter, velger du et lavt tall. Velg et høyere tall 	hvis helseproblemer hadde stor innvirkning på dine aktiviteter.</i></div>
+					</label>
+					<div class="slider-input-group">
+						<input type="range" name="wpai_activity_slider" class="slider-input" min="0" max="10" value="0" id="wpaiActivitySlider" required>
+						<input type="number" name="wpai_activity" class="form-input slider-number" min="0" max="10" value="0" id="wpaiActivityNumber" required>
+					</div>
+					<div style="margin-top: 8px; color: #888; font-size:0.95em; text-align:center;">
+						0: Helseproblemer hadde ingen innvirkning på mine daglige aktiviteter<br>
+						10: Helseproblemer hindret meg fullstendig i å utføre daglige aktiviteter
+					</div>
+				</div>
+			</div>
+
             
             <div class="nav-buttons">
                 <button type="button" class="nav-btn prev-btn" id="prevBtn" style="display: none;">Forrige</button>
@@ -3067,6 +2919,165 @@
             }
         });
     </script>
+	
+	<script>
+	document.getElementById('postalCodeInput').addEventListener('input', function() {
+		var val = parseInt(this.value, 10);
+		var errorDiv = document.getElementById('postalCodeError');
+		if (this.value === "") {
+			errorDiv.style.display = "none";
+			this.setCustomValidity("");
+		} else if (isNaN(val) || val < 1 || val > 9999) {
+			errorDiv.style.display = "block";
+			this.setCustomValidity("Postnummer må være mellom 0001 og 9999.");
+		} else {
+			errorDiv.style.display = "none";
+			this.setCustomValidity("");
+		}
+	});
+	</script>
+
+	<script>
+		// Disability percentage slider sync + validation
+		const disSlider = document.getElementById('disabilityPercentageSlider');
+		const disNumber = document.getElementById('disabilityPercentageNumber');
+		const disError = document.getElementById('disabilityPercentageError');
+
+		function updateDisabilityInputs(e) {
+			let val = parseInt(e.target.value, 10);
+			if (e.target === disSlider) {
+				disNumber.value = val;
+			} else {
+				disSlider.value = val;
+			}
+			if (isNaN(val) || val < 50 || val > 99) {
+				disError.style.display = 'block';
+				disNumber.setCustomValidity("Uføregrad må være mellom 50 og 99.");
+			} else {
+				disError.style.display = 'none';
+				disNumber.setCustomValidity("");
+			}
+		}
+		if (disSlider && disNumber && disError) {
+			disSlider.addEventListener('input', updateDisabilityInputs);
+			disNumber.addEventListener('input', updateDisabilityInputs);
+		}
+	</script>
+
+	<script>
+	function syncSliderAndNumber(sliderId, numberId, min, max) {
+		const slider = document.getElementById(sliderId);
+		const number = document.getElementById(numberId);
+		if (slider && number) {
+			slider.addEventListener('input', () => {
+				number.value = slider.value;
+			});
+			number.addEventListener('input', () => {
+				let val = parseInt(number.value, 10);
+				if (isNaN(val) || val < min) val = min;
+				if (val > max) val = max;
+				slider.value = val;
+				number.value = val;
+			});
+		}
+	}
+
+	// Symptoms days (0-7)
+	syncSliderAndNumber('symptomsDaysSlider', 'symptomsDaysNumber', 0, 7);
+	// Itch scale (0-10)
+	syncSliderAndNumber('itchScaleSlider', 'itchScaleNumber', 0, 10);
+	// Sleep interference (0-4)
+	syncSliderAndNumber('sleepInterferenceSlider', 'sleepInterferenceNumber', 0, 4);
+	</script>
+
+	<script>
+	function syncSliderAndNumber(sliderId, numberId, min, max, callback) {
+		const slider = document.getElementById(sliderId);
+		const number = document.getElementById(numberId);
+		if (slider && number) {
+			slider.addEventListener('input', () => {
+				number.value = slider.value;
+				if (callback) callback(slider.value);
+			});
+			number.addEventListener('input', () => {
+				let val = parseInt(number.value, 10);
+				if (isNaN(val) || val < min) val = min;
+				if (val > max) val = max;
+				slider.value = val;
+				number.value = val;
+				if (callback) callback(val);
+			});
+		}
+	}
+
+	// Existing slider/number syncs:
+	syncSliderAndNumber('wpaiHoursShouldWorkSlider', 'wpaiHoursShouldWorkNumber', 0, 168);
+	syncSliderAndNumber('wpaiHoursMissedHealthSlider', 'wpaiHoursMissedHealthNumber', 0, 168);
+	// NEW: for "andre grunner", include callback to show/hide presenteeism
+	syncSliderAndNumber('wpaiHoursMissedOtherSlider', 'wpaiHoursMissedOtherNumber', 0, 168, function(val) {
+		const presenteeismGroup = document.getElementById('wpaiPresenteeismGroup');
+		if (parseInt(val, 10) === 0) {
+			presenteeismGroup.style.display = 'none';
+			// Optionally, clear any value
+			document.getElementById('wpaiPresenteeismSlider').value = 0;
+			document.getElementById('wpaiPresenteeismNumber').value = 0;
+		} else {
+			presenteeismGroup.style.display = '';
+		}
+	});
+	syncSliderAndNumber('wpaiPresenteeismSlider', 'wpaiPresenteeismNumber', 0, 10);
+	syncSliderAndNumber('wpaiActivitySlider', 'wpaiActivityNumber', 0, 10);
+
+	// WPAI employed questions show/hide logic unchanged
+	const wpaiWorkingRadios = document.querySelectorAll('input[name="wpai_working"]');
+	const wpaiEmployedQuestions = document.getElementById('wpaiEmployedQuestions');
+	wpaiWorkingRadios.forEach(radio => {
+		radio.addEventListener('change', function() {
+			if (this.value === "yes") {
+				wpaiEmployedQuestions.style.display = "";
+			} else if (this.value === "no") {
+				wpaiEmployedQuestions.style.display = "none";
+			}
+		});
+	});
+	window.addEventListener('DOMContentLoaded', function() {
+		const checked = document.querySelector('input[name="wpai_working"]:checked');
+		if (checked && checked.value === "no") {
+			wpaiEmployedQuestions.style.display = "none";
+		}
+		// Ensure correct show/hide on reload:
+		const otherSlider = document.getElementById('wpaiHoursMissedOtherSlider');
+		const presenteeismGroup = document.getElementById('wpaiPresenteeismGroup');
+		if (otherSlider && presenteeismGroup) {
+			if (parseInt(otherSlider.value, 10) === 0) {
+				presenteeismGroup.style.display = 'none';
+			} else {
+				presenteeismGroup.style.display = '';
+			}
+		}
+	});
+	</script>
+
+	<script>
+	function syncSliderAndNumber(sliderId, numberId, min, max) {
+		const slider = document.getElementById(sliderId);
+		const number = document.getElementById(numberId);
+		if (slider && number) {
+			slider.addEventListener('input', () => {
+				number.value = slider.value;
+			});
+			number.addEventListener('input', () => {
+				let val = parseInt(number.value, 10);
+				if (isNaN(val) || val < min) val = min;
+				if (val > max) val = max;
+				slider.value = val;
+				number.value = val;
+			});
+		}
+	}
+	syncSliderAndNumber('satisfactionSlider', 'satisfactionNumber', 0, 10);
+	</script>
+
 </body>
 </html>
 							
